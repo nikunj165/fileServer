@@ -4,7 +4,6 @@
 package org.adobe.initiation;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,8 +26,8 @@ public class FileServer implements Runnable {
 		int numThreads = 10;
 		String webroot = "wwwroot";
 		if (args.length == 0) {
-			System.out
-					.println("Usage: java -cp FileServer <port> <numThreads>");
+			System.out.println(
+					"Usage: java -cp FileServer <port> <numThreads> <webroot>");
 		} else {
 			port = Integer.parseInt(args[0]);
 			numThreads = Integer.parseInt(args[1]);
@@ -47,9 +46,10 @@ public class FileServer implements Runnable {
 	@Override
 	public void run() {
 		try {
-			this.server = new ServerSocket(port, 1, InetAddress.getLocalHost());
+			this.server = new ServerSocket(port);
 		} catch (IOException e1) {
-			System.err.println("Cannot listen on port:" + port);
+			System.err.println(
+					"Cannot listen on port:" + port + " " + e1.getMessage());
 		}
 		threadsPool = Executors.newFixedThreadPool(threadsLimit);
 		System.out.println("Server running on the port " + port
