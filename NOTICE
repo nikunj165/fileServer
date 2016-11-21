@@ -1,0 +1,10 @@
+A multithreaded file web server in java
+
+Sources of inspiration:
+
+How to implement Multithreaded Servers in Java
+http://tutorials.jenkov.com/java-multithreaded-servers/thread-pooled-server.html
+Executor Service Code
+http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/ExecutorService.html#
+How WebServers work
+http://archive.oreilly.com/pub/a/onjava/2003/04/23/java_webserver.html?page=1

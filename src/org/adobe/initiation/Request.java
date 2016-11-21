@@ -19,7 +19,7 @@ public class Request {
 	private InputStream input;
 	private String uri;
 	private String method;
-	private String protocol;
+
 	private HashMap<String, String> headers;
 	private List<String> body;
 
@@ -40,7 +40,6 @@ public class Request {
 		}
 		method = requestHeaders[0];
 		uri = requestHeaders[1];
-		protocol = requestHeaders[2];
 
 		line = reader.readLine();
 		headers = new HashMap<String, String>();
@@ -60,18 +59,6 @@ public class Request {
 			body.add(line);
 		}
 
-	}
-	public String parseUri(String requestString) {
-		int index1, index2;
-		index1 = requestString.indexOf(' ');
-
-		if (index1 != -1) {
-			index2 = requestString.indexOf(' ', index1 + 1);
-			if (index2 > index1)
-				return requestString.substring(index1 + 1, index2);
-		}
-
-		return null;
 	}
 	public String getUri() {
 		return uri;

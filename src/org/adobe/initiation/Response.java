@@ -11,16 +11,8 @@ import java.util.HashMap;
 
 public class Response {
 	private File file;
-	private Request request;
 	private HashMap<String, String> responseHeader = new HashMap<String, String>();
 	private StatusCode statusCode;
-
-	public Request getRequest() {
-		return request;
-	}
-	public void setRequest(Request request) {
-		this.request = request;
-	}
 
 	public void renderResponse(OutputStream outputStream) {
 		FileInputStream fis = null;
@@ -36,7 +28,7 @@ public class Response {
 			setStatusCode(StatusCode.OK);
 		} catch (FileNotFoundException e) {
 			setStatusCode(StatusCode.NOT_FOUND);
-			String errorMessage = "<h1>File Not Found</h1>";
+			String errorMessage = "<h4>File Not Found</h4>";
 			setContentType(ContentType.HTML);
 			setContentLength(errorMessage.length());
 			body = errorMessage.getBytes();
@@ -49,16 +41,18 @@ public class Response {
 			body = errorMessage.getBytes();
 		} finally {
 			StringBuilder response = new StringBuilder("HTTP/1.1 ")
-					.append(statusCode.getCode()).append("\r\n");
+					.append(statusCode.getCode()).append("\n");
 
 			for (String key : responseHeader.keySet()) {
 				response.append(key).append(": ")
-						.append(responseHeader.get(key)).append("\r\n");
+						.append(responseHeader.get(key)).append("\n");
 			}
+			response.append("\r\n");
 			if (body != null)
-				response.append(body);
+				response.append(new String(body));
 			PrintWriter writer = new PrintWriter(outputStream);
 			writer.write(response.toString());
+			writer.flush();
 		}
 	}
 	private void setContentType(ContentType type) {
@@ -67,7 +61,7 @@ public class Response {
 	private void setStatusCode(StatusCode statusCode) {
 		this.statusCode = statusCode;
 	}
-	public void setContentLength(long value) {
+	public void setContentLength(int value) {
 		responseHeader.put("Content-Length", String.valueOf(value));
 	}
 	public void setFile(File f) {
@@ -75,5 +69,44 @@ public class Response {
 	}
 	public void setDate(Date date) {
 		responseHeader.put("Date", date.toString());
+	}
+	public void renderMethodNotSupported(OutputStream out) {
+		String errorMessage = "<h3>Method Not Allowed</h3>";
+		setContentType(ContentType.HTML);
+		setStatusCode(StatusCode.METHOD_NOT_ALLOWED);
+		setContentLength(errorMessage.length());
+		responseHeader.put("ALLOW", "GET");
+
+		StringBuilder response = new StringBuilder("HTTP/1.1 ")
+				.append(statusCode.getCode()).append("\n");
+
+		for (String key : responseHeader.keySet()) {
+			response.append(key).append(": ").append(responseHeader.get(key))
+					.append("\n");
+		}
+		response.append("\r\n");
+		response.append(errorMessage);
+		PrintWriter writer = new PrintWriter(out);
+		writer.write(response.toString());
+		writer.flush();
+	}
+	public void renderBadRequest(OutputStream out) {
+		String errorMessage = "<h3>Bad Request</h3>";
+		setContentType(ContentType.HTML);
+		setStatusCode(StatusCode.BAD_REQUEST);
+		setContentLength(errorMessage.length());
+
+		StringBuilder response = new StringBuilder("HTTP/1.1 ")
+				.append(statusCode.getCode()).append("\n");
+
+		for (String key : responseHeader.keySet()) {
+			response.append(key).append(": ").append(responseHeader.get(key))
+					.append("\n");
+		}
+		response.append("\r\n");
+		response.append(errorMessage);
+		PrintWriter writer = new PrintWriter(out);
+		writer.write(response.toString());
+		writer.flush();
 	}
 }

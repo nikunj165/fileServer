@@ -16,10 +16,16 @@ import java.util.concurrent.TimeUnit;
 public class FileServer implements Runnable {
 
 	private ServerSocket server;
-	private final String WEB_ROOT;
+	private final String webRoot;
 	private ExecutorService threadsPool;
 	private final int port;
 	private final int threadsLimit;
+
+	public FileServer(int port, int numThreads, String webRoot) {
+		this.webRoot = webRoot;
+		this.port = port;
+		threadsLimit = numThreads;
+	}
 
 	public static void main(String[] args) {
 		int port = 8086;
@@ -27,20 +33,16 @@ public class FileServer implements Runnable {
 		String webroot = "wwwroot";
 		if (args.length == 0) {
 			System.out.println(
-					"Usage: java -cp FileServer <port> <numThreads> <webroot>");
+					"Usage: java -jar fileserver.jar [port] [numThreads] [webroot]");
 		} else {
 			port = Integer.parseInt(args[0]);
 			numThreads = Integer.parseInt(args[1]);
 			webroot = args[2];
 		}
+		// Construct a server object
 		FileServer server = new FileServer(port, numThreads, webroot);
+		// Start the server thread
 		new Thread(server).start();
-
-	}
-	public FileServer(int port, int numThreads, String webroot) {
-		WEB_ROOT = webroot;
-		this.port = port;
-		threadsLimit = numThreads;
 	}
 
 	@Override
@@ -50,20 +52,23 @@ public class FileServer implements Runnable {
 		} catch (IOException e1) {
 			System.err.println(
 					"Cannot listen on port:" + port + " " + e1.getMessage());
+			System.exit(1);
 		}
 		threadsPool = Executors.newFixedThreadPool(threadsLimit);
 		System.out.println("Server running on the port " + port
-				+ " with web root folder \"" + WEB_ROOT + "\" and "
+				+ " with web root folder \"" + webRoot + "\" and "
 				+ threadsLimit + " threads limit.");
 
 		while (!Thread.interrupted()) {
 			try {
 				threadsPool.execute(
 						new Thread(new TaskExecutor(server.accept(), this)));
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				System.err.println("Exception occurred while executing request "
+						+ e.getMessage());
 			}
 		}
+		// close the server
 		close();
 	}
 
@@ -94,6 +99,6 @@ public class FileServer implements Runnable {
 		}
 	}
 	public String getWEB_ROOT() {
-		return WEB_ROOT;
+		return webRoot;
 	}
 }
